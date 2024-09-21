@@ -1,0 +1,168 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+	"log"
+	"os"
+)
+
+
+type Creature interface {
+	MakeSound() (string, error)
+	MoveAround() (string, error)
+	ConsumeFood() (string, error)
+	TakeRest() (string, error)
+}
+
+
+type WaterCreature interface {
+	SwimsWell() bool
+}
+
+// Кошка
+type Cat struct{}
+
+func (c Cat) MakeSound() (string, error) { return "Мяукает", nil }
+func (c Cat) MoveAround() (string, error) { return "Ходит плавно", nil }
+func (c Cat) ConsumeFood() (string, error) { return "Ест рыбу и мясо", nil }
+func (c Cat) TakeRest() (string, error) { return "Спит на диване", nil }
+func (c Cat) Purr() (string, error) { return "Кошка мурлычет.", nil }
+
+// Собака
+type Dog struct{}
+
+func (d Dog) MakeSound() (string, error) { return "Лает", nil }
+func (d Dog) MoveAround() (string, error) { return "Бегает быстро", nil }
+func (d Dog) ConsumeFood() (string, error) { return "Ест сухой корм", nil }
+func (d Dog) TakeRest() (string, error) { return "Спит в будке", nil }
+func (d Dog) WagTail() (string, error) { return "Собака виляет хвостом.", nil }
+
+// Черепаха
+type Turtle struct{}
+
+func (t Turtle) MakeSound() (string, error) { return "Черепаха не издаёт звуков", nil }
+func (t Turtle) MoveAround() (string, error) { return "Ползет медленно", nil }
+func (t Turtle) ConsumeFood() (string, error) { return "Ест листья", nil }
+func (t Turtle) TakeRest() (string, error) { return "Спит в тени деревьев", nil }
+func (t Turtle) HideInShell() (string, error) { return "Черепаха прячется в панцирь.", nil }
+
+// Рыбка
+type Fish struct{}
+
+func (f Fish) MakeSound() (string, error) { return "Рыбка не издаёт звуков", nil }
+func (f Fish) MoveAround() (string, error) { return "Плавает в воде", nil }
+func (f Fish) ConsumeFood() (string, error) { return "Ест корм для рыб", nil }
+func (f Fish) TakeRest() (string, error) { return "Отдыхает на дне аквариума", nil }
+func (f Fish) SwimsWell() bool { return true }
+func (f Fish) BlowBubbles() (string, error) { return "Рыбка пускает пузыри.", nil }
+
+
+type UnknownAnimal struct{}
+
+func (u UnknownAnimal) MakeSound() (string, error) {
+	return "", errors.New("Неизвестное животное не может издавать звук")
+}
+func (u UnknownAnimal) MoveAround() (string, error) { return "", nil }
+func (u UnknownAnimal) ConsumeFood() (string, error) { return "", nil }
+func (u UnknownAnimal) TakeRest() (string, error) { return "", nil }
+
+
+func logError(err error) {
+	if err != nil {
+		log.Println("Ошибка:", err)
+	}
+}
+
+func main() {
+	
+	file, err := os.OpenFile("errors.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Println("Не удалось открыть файл логов:", err)
+		return
+	}
+	defer file.Close()
+	log.SetOutput(file)
+
+
+	cat := Cat{}
+	dog := Dog{}
+	turtle := Turtle{}
+	fish := Fish{}
+	unknown := UnknownAnimal{}
+
+	
+	var choice int
+	fmt.Println("Выберите животное (1: Кошка, 2: Собака, 3: Черепаха, 4: Рыбка, 5: Неизвестное животное):")
+	_, err = fmt.Scan(&choice)
+	logError(err) 
+
+	
+	creatures := []Creature{}
+	switch choice {
+	case 1:
+		creatures = append(creatures, cat)
+	case 2:
+		creatures = append(creatures, dog)
+	case 3:
+		creatures = append(creatures, turtle)
+	case 4:
+		creatures = append(creatures, fish)
+	case 5:
+		creatures = append(creatures, unknown)
+	default:
+		fmt.Println("Неверный выбор.")
+		return
+	}
+
+	
+	for _, creature := range creatures {
+		if sound, err := creature.MakeSound(); err != nil {
+			logError(err) // Логирование ошибки
+		} else {
+			fmt.Println("Звук:", sound)
+		}
+
+		if movement, err := creature.MoveAround(); err != nil {
+			logError(err)
+		} else {
+			fmt.Println("Движение:", movement)
+		}
+
+		if food, err := creature.ConsumeFood(); err != nil {
+			logError(err)
+		} else {
+			fmt.Println("Еда:", food)
+		}
+
+		if rest, err := creature.TakeRest(); err != nil {
+			logError(err)
+		} else {
+			fmt.Println("Отдых:", rest)
+		}
+		fmt.Println()
+	}
+
+
+	waterCreatures := []WaterCreature{fish}
+	for _, swimmer := range waterCreatures {
+		fmt.Printf("Может плавать? %v\n", swimmer.SwimsWell())
+	}
+
+	
+	if purr, err := cat.Purr(); err == nil {
+		fmt.Println(purr)
+	}
+
+	if wagTail, err := dog.WagTail(); err == nil {
+		fmt.Println(wagTail)
+	}
+
+	if hideInShell, err := turtle.HideInShell(); err == nil {
+		fmt.Println(hideInShell)
+	}
+
+	if blowBubbles, err := fish.BlowBubbles(); err == nil {
+		fmt.Println(blowBubbles)
+	}
+}
