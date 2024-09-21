@@ -1,0 +1,80 @@
+1)animals/animal.go
+
+package animals
+
+import "fmt"
+
+
+type Animal interface {
+    Sound() (string, error)
+}
+
+type Dog struct {
+    Name string
+}
+
+func (d Dog) Sound() (string, error) {
+    if d.Name == "" {
+        return "", fmt.Errorf("Dog has no name")
+    }
+    return "Woof!", nil
+}
+
+type Cat struct {
+    Name string
+}
+
+func (c Cat) Sound() (string, error) {
+    if c.Name == "" {
+        return "", fmt.Errorf("Cat has no name")
+    }
+    return "Meow!", nil
+}
+
+2)interaction/interaction.go
+
+package interaction
+
+import (
+    "animals-project/animals"
+    "animals-project/utils"
+    "fmt"
+)
+
+func MakeAnimalSound(a animals.Animal) {
+    sound, err := a.Sound()
+    if err != nil {
+        utils.HandleError(err)
+        return
+    }
+    fmt.Println("Animal sound:", sound)
+}
+
+3)utils/utils.go
+
+package utils
+
+import "fmt"
+
+func HandleError(err error) {
+    fmt.Println("Error:", err.Error())
+}
+
+4)main.go
+
+package main
+
+import (
+    "animals-project/animals"
+    "animals-project/interaction"
+)
+
+func main() {
+    
+    dog := animals.Dog{Name: "Buddy"}
+    cat := animals.Cat{Name: ""} // Имя не задано
+
+    
+    interaction.MakeAnimalSound(dog)
+    interaction.MakeAnimalSound(cat)
+}
