@@ -1,0 +1,178 @@
+package main
+
+import (
+	"fmt"
+)
+
+
+type Creature interface {
+	MakeSound() string
+	MoveAround() string
+	ConsumeFood() string
+	TakeRest() string
+}
+
+
+type WaterCreature interface {
+	SwimsWell() bool
+}
+
+// Кошка
+type Cat struct{}
+
+func (c Cat) MakeSound() string {
+	return "Мяукает"
+}
+
+func (c Cat) MoveAround() string {
+	return "Ходит плавно"
+}
+
+func (c Cat) ConsumeFood() string {
+	return "Ест рыбу и мясо"
+}
+
+func (c Cat) TakeRest() string {
+	return "Спит на диване"
+}
+
+
+func (c Cat) Purr() string {
+	return "Кошка мурлычет."
+}
+
+// Собака
+type Dog struct{}
+
+func (d Dog) MakeSound() string {
+	return "Лает"
+}
+
+func (d Dog) MoveAround() string {
+	return "Бегает быстро"
+}
+
+func (d Dog) ConsumeFood() string {
+	return "Ест сухой корм"
+}
+
+func (d Dog) TakeRest() string {
+	return "Спит в будке"
+}
+
+
+func (d Dog) WagTail() string {
+	return "Собака виляет хвостом."
+}
+
+// Черепаха
+type Turtle struct{}
+
+func (t Turtle) MakeSound() string {
+	return "Черепаха не издаёт звуков"
+}
+
+func (t Turtle) MoveAround() string {
+	return "Ползет медленно"
+}
+
+func (t Turtle) ConsumeFood() string {
+	return "Ест листья"
+}
+
+func (t Turtle) TakeRest() string {
+	return "Спит в тени деревьев"
+}
+
+
+func (t Turtle) HideInShell() string {
+	return "Черепаха прячется в панцирь."
+}
+
+// Рыбка
+type Fish struct{}
+
+func (f Fish) MakeSound() string {
+	return "Рыбка не издаёт звуков"
+}
+
+func (f Fish) MoveAround() string {
+	return "Плавает в воде"
+}
+
+func (f Fish) ConsumeFood() string {
+	return "Ест корм для рыб"
+}
+
+func (f Fish) TakeRest() string {
+	return "Отдыхает на дне аквариума"
+}
+
+
+func (f Fish) SwimsWell() bool {
+	return true
+}
+
+
+func (f Fish) BlowBubbles() string {
+	return "Рыбка пускает пузыри."
+}
+
+// Попугай
+type Parrot struct{}
+
+func (p Parrot) MakeSound() string {
+	return "Попугай говорит"
+}
+
+func (p Parrot) MoveAround() string {
+	return "Летает в клетке"
+}
+
+func (p Parrot) ConsumeFood() string {
+	return "Ест семечки"
+}
+
+func (p Parrot) TakeRest() string {
+	return "Спит на жердочке"
+}
+
+
+func (p Parrot) MimicSpeech() string {
+	return "Попугай повторяет речь."
+}
+
+func main() {
+	
+	cat := Cat{}
+	dog := Dog{}
+	turtle := Turtle{}
+	fish := Fish{}
+	parrot := Parrot{}
+
+	
+	creatures := []Creature{cat, dog, turtle, fish, parrot}
+
+	
+	for _, creature := range creatures {
+		fmt.Println("Звук:", creature.MakeSound())
+		fmt.Println("Движение:", creature.MoveAround())
+		fmt.Println("Питание:", creature.ConsumeFood())
+		fmt.Println("Отдых:", creature.TakeRest())
+		fmt.Println()
+	}
+
+	
+	waterCreatures := []WaterCreature{fish} 
+
+	for _, swimmer := range waterCreatures {
+		fmt.Printf("Умеет плавать? %v\n", swimmer.SwimsWell())
+	}
+
+	
+	fmt.Println(cat.Purr())
+	fmt.Println(dog.WagTail())
+	fmt.Println(turtle.HideInShell())
+	fmt.Println(fish.BlowBubbles())
+	fmt.Println(parrot.MimicSpeech())
+}
