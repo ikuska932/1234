@@ -1,0 +1,133 @@
+/Project
+/db
+ db.go
+ models.go
+main.go
+
+1)
+db.go
+package db
+
+import (
+    "database/sql"
+    "fmt"
+    _ "github.com/go-sql-driver/mysql"
+)
+
+var db *sql.DB
+
+func InitDB(dataSourceName string) error {
+    var err error
+    db, err = sql.Open("mysql", dataSourceName)
+    if err != nil {
+        return fmt.Errorf("Error connecting to the database: %v", err)
+    }
+
+    if err = db.Ping(); err != nil {
+        return fmt.Errorf("Error pinging the database: %v", err)
+    }
+
+    return nil
+}
+
+func AddAnimal(name string, speciesID, environmentID int) error {
+    _, err := db.Exec("INSERT INTO animals (name, species_id, environment_id) VALUES (?, ?, ?)", name, speciesID, environmentID)
+    if err != nil {
+        return fmt.Errorf("Error inserting animal: %v", err)
+    }
+    return nil
+}
+
+func GetAllAnimals() ([]Animal, error) {
+    rows, err := db.Query("SELECT id, name FROM animals ORDER BY name ASC")
+    if err != nil {
+        return nil, fmt.Errorf("Error fetching animals: %v", err)
+    }
+    defer rows.Close()
+
+    var animals []Animal
+    for rows.Next() {
+        var animal Animal
+        if err := rows.Scan(&animal.ID, &animal.Name); err != nil {
+            return nil, fmt.Errorf("Error scanning row: %v", err)
+        }
+        animals = append(animals, animal)
+    }
+
+    return animals, nil
+}
+
+func CloseDB() error {
+    return db.Close()
+}
+
+2)models.go
+
+package db
+type Animal struct {
+    ID   int
+    Name string
+}
+
+3)main.go
+
+package main
+
+import (
+    "fmt"
+    "log"
+    "project/db"
+)
+
+func main() {
+    
+    err := db.InitDB("youruser:yourpassword@tcp(localhost:3306)/animals_db")
+    if err != nil {
+        log.Fatalf("Error initializing database: %v", err)
+    }
+    defer db.CloseDB()
+
+    
+    err = db.AddAnimal("Tiger", 1, 1)
+    if err != nil {
+        log.Printf("Error adding animal: %v", err)
+    }
+
+    
+    animals, err := db.GetAllAnimals()
+    if err != nil {
+        log.Printf("Error retrieving animals: %v", err)
+    }
+
+    
+    fmt.Println("All animals:")
+    for _, animal := range animals {
+        fmt.Println(animal.Name)
+    }
+}
+
+
+4)create tables in sql
+
+CREATE TABLE species (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+
+CREATE TABLE environments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+
+CREATE TABLE animals (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    species_id INT,
+    environment_id INT,
+    FOREIGN KEY (species_id) REFERENCES species(id),
+    FOREIGN KEY (environment_id) REFERENCES environments(id)
+);
+
+
